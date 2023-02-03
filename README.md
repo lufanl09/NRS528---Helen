@@ -16,4 +16,4 @@ This is one of my favorite Thai dishes, fried morning glory! It's really delicio
 
 ### Research Interests
 
-My main research interest in renewable energy, and more specifically, repurposed electric vehicle batteries. For my master's paper
+My main research interest in renewable energy, and more specifically, repurposed electric vehicle batteries. For my master's paper, I performed a discrete choice model in the broader United States to get a better understanding of consumer preferences for new vs. repurposed batteries for residential energy storage. I believe that by repurposing EV batteries, we can at least prolong the amount of waste entering the environment for a longer period of time. 
