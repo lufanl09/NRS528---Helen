@@ -1,5 +1,3 @@
-# NRS528---Helen
-
 ## Hello!
 
 ### Who Am I?
