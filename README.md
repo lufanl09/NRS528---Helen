@@ -12,7 +12,7 @@ I was born in Beijing, China, and moved to Bangkok, Thailand, when I was 9. Afte
 
 ![This is an image](https://cdn.foodaciously.com/static/recipes/333cf710-de91-4b63-9b33-929e640813c7/pad-pak-boong-thai-fried-morning-glory-9b21905160d70354dec8cdaab7aa5202-960-q70.jpg)
 
-This is one of my favorite Thai dishes, fried morning glory! It's really delicious and a staple in Thailand!
+_This is one of my favorite Thai dishes, fried morning glory! It's really delicious and a staple in Thailand!_
 
 ### Research Interests
 
