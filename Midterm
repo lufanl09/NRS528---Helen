@@ -4,7 +4,7 @@
 # For this midterm, I want to find the average number of days with good air quality for each state. I started by
 # creating a list of all the states in the csv file. Then, I used that list to split the csv file by state into separate
 # files. Next, I created calculated the average for each state and created a new file with the result.
-# The 2022 air quality data is downloaded from the EPA.
+# The file used for this assignment is called annual_aqi_by_county_2022.csv. It is downloaded from the EPA website.
 ###############
 
 ### Import modules
