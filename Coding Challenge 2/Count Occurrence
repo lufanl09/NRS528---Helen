@@ -1,4 +1,4 @@
-3. Given a single phrase, count the occurrence of each word
+# 3. Given a single phrase, count the occurrence of each word
 
 string = 'hi dee hi how are you mr dee'
 
