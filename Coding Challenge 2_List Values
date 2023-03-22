@@ -1,9 +1,0 @@
-1. List Values
-num_list = [1, 2, 3, 6, 8, 12, 20, 32, 46, 85]
-
-new_list = []
-
-for i in num_list:
-    if i < 5:
-        new_list.append(i)
-print(new_list)
