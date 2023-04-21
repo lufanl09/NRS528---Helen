@@ -32,6 +32,8 @@ os.removedirs("C:\layouts\post\posted")
 os.removedirs("C:\site")
 
 
+####################################################################################
+
 
 ### PART 2. Push sys.argv to the limit
 import sys
@@ -49,9 +51,12 @@ for i in argument_list:
     counter = counter + 1
 
 
+####################################################################################
+
 
 ### PART 3. Working with CSV
 import csv
+# directory = r"C:\NRS528\Class_03\challenge3"
 
 # 1. Annual average for each year in the dataset
 # split and create list of all years
@@ -64,7 +69,7 @@ with open("co2-ppm-daily.csv") as co2_csv:
     next(co2_csv)
     for row in csv.reader(co2_csv):
         date = row[0]
-        month, day, year = date.split("/")
+        year, month, day = date.split("-")
         if year in year_list:
             num_in_year[counter] = num_in_year[counter] + 1  # counter is telling you where you are
             sum_in_year[counter] = float(sum_in_year[counter]) + float(row[1])
@@ -82,7 +87,8 @@ print(sum_in_year[0])
 avg_per_year = []
 for i in range(0, len(sum_in_year)):
     avg_per_year.append(float(sum_in_year[i]) / float(num_in_year[i]))
-print(avg_per_year)
+print("The annual average carbon dioxide level for each year is " + str(avg_per_year))
+
 
 # 2. Minimum, maximum and average for the entire dataset.
 # generate value column as a list
@@ -91,12 +97,12 @@ with open("co2-ppm-daily.csv") as co2_csv:
     next(co2_csv)
     for row in csv.reader(co2_csv):
         value_list.append(float(row[1]))
-print(value_list)
-print(min(value_list))
-print(max(value_list))
+print("The minimum is " + str(min(value_list)))
+print("The maximum is " + str(max(value_list)))
 sum_list = sum(value_list)
 average = sum_list / (int(len(value_list)))
-print(average)
+print("The average is " + str(average))
+
 
 # 3. Seasonal average if Spring (March, April, May),
 # Summer (June, July, August), Autumn (September, October, November)
@@ -111,7 +117,7 @@ with open("co2-ppm-daily.csv") as co2_csv:
     for row in csv.reader(co2_csv):
         date = row[0]
         value = row[1]
-        month, day, year = date.split("/")
+        year, month, day = date.split("-")
 
         if (int(month) == 3) or (int(month) == 4) or (int(month) == 5):
             spring.append(float(value))
@@ -123,19 +129,20 @@ with open("co2-ppm-daily.csv") as co2_csv:
             winter.append(float(value))
 
 spring_avg = sum(spring) / len(spring)
-print(spring_avg)
+print("The spring average is " + str(spring_avg))
 
 summer_avg = sum(summer) / len(summer)
-print(summer_avg)
+print("The summer average is " + str(summer_avg))
 
 autumn_avg = sum(autumn) / len(autumn)
-print(autumn_avg)
+print("The autumn average is " + str(autumn_avg))
 
 winter_avg = sum(winter) / len(winter)
-print(winter_avg)
+print("The winter average is " + str(winter_avg))
+
 
 # 4. Calculate the anomaly for each value in the dataset relative to the mean for the entire time series.
-# anomaly = mean - value
+# anomaly = average - value (using the average calculated in Question 3 Part 2)
 anomaly_list = []
 with open("co2-ppm-daily.csv") as co2_csv:
     next(co2_csv)
