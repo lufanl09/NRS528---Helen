@@ -51,8 +51,8 @@ for folder in raster_folders:
     print(raster_list_b5)
 
     # Set up raster calculator to calculate NDVI
-        # Since B5 represents NIR and B4 represents VIS, we will replace
-        # NDVI = (NIR - VIS)/(NIR + VIS) with the appropriate bands
+    # Since B5 represents NIR and B4 represents VIS, we will replace
+    # NDVI = (NIR - VIS)/(NIR + VIS) with the appropriate bands
 
     ndvi_02 = (arcpy.Raster(raster_list_b5[0]) - arcpy.Raster(raster_list_b4[0]))/arcpy.Raster((raster_list_b5[0]) + arcpy.Raster(raster_list_b4[0]))
     arcpy.env.workspace = ws
