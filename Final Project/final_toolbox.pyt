@@ -28,6 +28,7 @@
 # Preliminary step: please change the working directory on line 32 before running the code.
 
 import arcpy
+import csv
 
 # arcpy.env.workspace = r"C:\NRS528\FinalProject"
 
@@ -39,7 +40,7 @@ class Toolbox(object):
         self.alias = ""
 
         # List of tool classes associated with this toolbox
-        self.tools = [FirstSelectTool, ClipTool, SecondSelectTool, BufferTool]
+        self.tools = [FirstSelectTool, ClipTool, SecondSelectTool, BufferTool, SpeciesSplit]
 
 
 # The select tool is to select a town in Rhode Island as the main study area
@@ -334,47 +335,109 @@ class BufferTool(object):
         return
 
 
+
+# The buffer tool is to buffer around a certain type of land cover to find suitable land
+class SpeciesSplit(object):
+    def __init__(self):
+        """Define the tool (tool name is the name of the class)."""
+        self.label = "Buffer Tool"
+        self.description = "Creates buffer polygons around input features to a specified distance."
+        self.canRunInBackground = False
+
+    def getParameterInfo(self):
+        """Define parameter definitions"""
+        params = []
+        input_folder = arcpy.Parameter(name="input_folder",
+                                        displayName="Input Folder",
+                                        datatype="DEWorkspace",
+                                        parameterType="Required",  # Required|Optional|Derived
+                                        direction="Input",  # Input|Output
+                                        )
+        params.append(input_folder)
+
+        input_file = arcpy.Parameter(name="input_file",
+                                        displayName="Input Species CSV file",
+                                        datatype="DETable",
+                                        parameterType="Required",  # Required|Optional|Derived
+                                        direction="Input",  # Input|Output
+                                        )
+        params.append(input_file)
+
+        return params
+
+    def isLicensed(self):
+        """Set whether tool is licensed to execute."""
+        return True
+
+    def updateParameters(self, parameters):
+        """Modify the values and properties of parameters before internal
+        validation is performed.  This method is called whenever a parameter
+        has been changed."""
+        return
+
+    def updateMessages(self, parameters):
+        """Modify the messages created by internal validation for each tool
+        parameter.  This method is called after internal validation."""
+        return
+
+    def execute(self, parameters, messages):
+        """The source code of the tool."""
+        input_directory = parameters[0].valueAsText
+
+        keep_temp_files = True
+
+        # DO NOT DO ANYTHING TO THE BELOW
+        if not os.path.exists(os.path.join(input_directory, "temporary_files")):
+            os.mkdir(os.path.join(input_directory, "temporary_files"))
+        if not os.path.exists(os.path.join(input_directory, "outputs")):
+            os.mkdir(os.path.join(input_directory, "outputs"))
+
+        # Let's determine our species and split files
+        def define_species(data_file):
+
+            species_list = []
+            with open(os.path.join(input_directory, data_file)) as species_csv:
+                header_line = next(species_csv)
+                for row in csv.reader(species_csv):
+                    try: # Using try/except saves us if there is a line with no data in the file
+                        if row[0] not in species_list:
+                            species_list.append(row[0])
+                    except:
+                        pass
+            print("..There are: " + str(len(species_list)) + " species to process..")
+
+            if len(species_list) > 1:
+                for s in species_list:
+                    s_count = 1
+                    with open(os.path.join(input_directory, data_file)) as species_csv:
+                        for row in csv.reader(species_csv):
+                            if row[0] == s:
+                                if s_count == 1:
+                                    file = open(os.path.join(input_directory, "temporary_files", s + ".csv"), "w")
+                                    file.write(header_line)
+                                    s_count = 0
+                                # make well formatted line
+                                file.write(",".join(row))
+                                file.write("\n")
+                    file.close()
+
+        data_file = parameters[1].valueAsText
+        define_species(data_file)
+
+
+        return
+
+
+
 # The following is a series of tests to make sure the tools are functioning
 # Test the first Select tool
-def main():
-    tool = FirstSelectTool()
-    tool.execute(tool.getParameterInfo(), None)
-
-if __name__ == '__main__':
-    main()
-
-print("First Select Tool completed")
-
-# Test the Clip tool
-def main():
-    tool = ClipTool()
-    tool.execute(tool.getParameterInfo(), None)
-
-if __name__ == '__main__':
-    main()
-
-print("Clip Tool completed")
-
-# Test the second Select tool
-def main():
-    tool = SecondSelectTool()
-    tool.execute(tool.getParameterInfo(), None)
-
-if __name__ == '__main__':
-    main()
-
-print("Second Select Tool completed")
-
-# Finally, test the Buffer tool
-def main():
-    tool = BufferTool()
-    tool.execute(tool.getParameterInfo(), None)
-
-if __name__ == '__main__':
-    main()
-
-print("Buffer Tool completed")
-
-print("End of assignment")
-
-
+#
+# #[FirstSelectTool, ClipTool, SecondSelectTool, BufferTool, SpeciesSplit]
+# def main():
+#     tool = ClipTool()
+#     tool.execute(tool.getParameterInfo(), None)
+#
+# if __name__ == '__main__':
+#     main()
+#
+#
