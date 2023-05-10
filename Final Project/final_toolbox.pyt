@@ -29,7 +29,7 @@
 
 import arcpy
 
-arcpy.env.workspace = r"C:\NRS528\FinalProject"
+# arcpy.env.workspace = r"C:\NRS528\FinalProject"
 
 class Toolbox(object):
     def __init__(self):
@@ -59,7 +59,7 @@ class FirstSelectTool(object):
                                      parameterType="Required", # Required|Optional|Derived
                                      direction="Input", # Input|Output
                                      )
-        in_feature.value = r"towns.shp"  # This is a default value that can be over-ridden in the toolbox
+#         in_feature.value = r"towns.shp"  # This is a default value that can be over-ridden in the toolbox
         params.append(in_feature)
 
         expression_input = arcpy.Parameter(name="where_clause",
@@ -77,7 +77,7 @@ class FirstSelectTool(object):
                                       parameterType="Required",
                                       direction="Output",
                                       )
-        out_feature.value = r"First_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
+#         out_feature.value = r"First_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
         params.append(out_feature)
 
         return params
@@ -103,10 +103,18 @@ class FirstSelectTool(object):
         expression_input = parameters[1].valueAsText
         out_feature = parameters[2].valueAsText
 
+        test_describe_object_input = arcpy.Describe(in_feature)
+
         arcpy.Select_analysis(in_features=in_feature,
                               out_feature_class=out_feature,
                               where_clause=expression_input,
                               )
+
+        test_describe_object_output = arcpy.Describe(out_feature)
+
+        arcpy.AddMessage("Input feature had a coordinate system of: " + test_describe_object_input.SpatialReference.name)
+        arcpy.AddMessage("Output feature had a coordinate system of: " + test_describe_object_output.SpatialReference.name)
+
         return
 
 
