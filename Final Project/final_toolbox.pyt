@@ -2,25 +2,9 @@
 # Final Toolbox
 ################
 
-# In your final assignment for this course, you should create a Python Toolbox that contains a minimum of three simple
-# tools for undertaking geoprocessing and file management operations. These tools can be discrete or part of a larger
-# workflow. However, the caveats are that you should create a "single file" toolbox (no includes, or external file
-# tools) and you should aim to not exceed 2000 lines of code in its entirety (but if you do, no worries).
-# You should document the toolbox using Github README.md and provide example data for running each of your tools.
-
-# Grading and feedback will focus on:
-    # 1) Does the toolbox install, and the tools run successfully?
-    # 2) Cleanliness of code
-    # 3) Functionality and depth of processing operation
-    # 4) Appropriate use of documentation
-    # 5) Provide example data that allows me to test your tools.
-
-# The criteria are:
-    # Does the toolbox install and run? (25 points)
-    # Cleanliness of code (25 points)
-    # Functionality and depth of processing (25 points)
-    # Appropriate use of documentation (15 points)
-    # In addition, you must provide example data (10 points).
+# .pyt file
+# add some arcpy.describe
+# do more to each code
 
 # The goal of this project is to find a suitable area to build a wind farm. The main geoprocessing tools that will be
 # used to create the toolbox are: Select, Clip, and Buffer.
@@ -29,8 +13,7 @@
 
 import arcpy
 import csv
-
-# arcpy.env.workspace = r"C:\NRS528\FinalProject"
+import os
 
 class Toolbox(object):
     def __init__(self):
@@ -60,7 +43,7 @@ class FirstSelectTool(object):
                                      parameterType="Required", # Required|Optional|Derived
                                      direction="Input", # Input|Output
                                      )
-#         in_feature.value = r"towns.shp"  # This is a default value that can be over-ridden in the toolbox
+        in_feature.value = r"C:\NRS528\FinalProject\towns.shp"
         params.append(in_feature)
 
         expression_input = arcpy.Parameter(name="where_clause",
@@ -78,7 +61,6 @@ class FirstSelectTool(object):
                                       parameterType="Required",
                                       direction="Output",
                                       )
-#         out_feature.value = r"First_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
         params.append(out_feature)
 
         return params
@@ -104,17 +86,16 @@ class FirstSelectTool(object):
         expression_input = parameters[1].valueAsText
         out_feature = parameters[2].valueAsText
 
-        test_describe_object_input = arcpy.Describe(in_feature)
-
         arcpy.Select_analysis(in_features=in_feature,
                               out_feature_class=out_feature,
                               where_clause=expression_input,
                               )
 
-        test_describe_object_output = arcpy.Describe(out_feature)
+        describe_input = arcpy.Describe(in_feature)
+        describe_output = arcpy.Describe(out_feature)
 
-        arcpy.AddMessage("Input feature had a coordinate system of: " + test_describe_object_input.SpatialReference.name)
-        arcpy.AddMessage("Output feature had a coordinate system of: " + test_describe_object_output.SpatialReference.name)
+        arcpy.AddMessage("Input feature had a coordinate system of: " + describe_input.SpatialReference.name)
+        arcpy.AddMessage("Output feature had a coordinate system of: " + describe_output.SpatialReference.name)
 
         return
 
@@ -136,7 +117,6 @@ class ClipTool(object):
                                      parameterType="Required",  # Required|Optional|Derived
                                      direction="Input",  # Input|Output
                                      )
-        in_feature.value = r"rilc11d.shp"  # This is a default value that can be over-ridden in the toolbox
         params.append(in_feature)
 
         clip_feature = arcpy.Parameter(name="clip_feature",
@@ -335,8 +315,6 @@ class BufferTool(object):
         return
 
 
-
-# The buffer tool is to buffer around a certain type of land cover to find suitable land
 class SpeciesSplit(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
@@ -348,19 +326,19 @@ class SpeciesSplit(object):
         """Define parameter definitions"""
         params = []
         input_folder = arcpy.Parameter(name="input_folder",
-                                        displayName="Input Folder",
-                                        datatype="DEWorkspace",
-                                        parameterType="Required",  # Required|Optional|Derived
-                                        direction="Input",  # Input|Output
-                                        )
+                                       displayName="Input Folder",
+                                       datatype="DEWorkspace",
+                                       parameterType="Required",  # Required|Optional|Derived
+                                       direction="Input",  # Input|Output
+                                       )
         params.append(input_folder)
 
         input_file = arcpy.Parameter(name="input_file",
-                                        displayName="Input Species CSV file",
-                                        datatype="DETable",
-                                        parameterType="Required",  # Required|Optional|Derived
-                                        direction="Input",  # Input|Output
-                                        )
+                                     displayName="Input Species CSV file",
+                                     datatype="DETable",
+                                     parameterType="Required",  # Required|Optional|Derived
+                                     direction="Input",  # Input|Output
+                                     )
         params.append(input_file)
 
         return params
@@ -384,9 +362,8 @@ class SpeciesSplit(object):
         """The source code of the tool."""
         input_directory = parameters[0].valueAsText
 
-        keep_temp_files = True
+        # keep_temp_files = True
 
-        # DO NOT DO ANYTHING TO THE BELOW
         if not os.path.exists(os.path.join(input_directory, "temporary_files")):
             os.mkdir(os.path.join(input_directory, "temporary_files"))
         if not os.path.exists(os.path.join(input_directory, "outputs")):
@@ -399,7 +376,7 @@ class SpeciesSplit(object):
             with open(os.path.join(input_directory, data_file)) as species_csv:
                 header_line = next(species_csv)
                 for row in csv.reader(species_csv):
-                    try: # Using try/except saves us if there is a line with no data in the file
+                    try:  # Using try/except saves us if there is a line with no data in the file
                         if row[0] not in species_list:
                             species_list.append(row[0])
                     except:
@@ -424,20 +401,18 @@ class SpeciesSplit(object):
         data_file = parameters[1].valueAsText
         define_species(data_file)
 
-
         return
 
 
 
 # The following is a series of tests to make sure the tools are functioning
-# Test the first Select tool
-#
-# #[FirstSelectTool, ClipTool, SecondSelectTool, BufferTool, SpeciesSplit]
-# def main():
-#     tool = ClipTool()
-#     tool.execute(tool.getParameterInfo(), None)
-#
-# if __name__ == '__main__':
-#     main()
-#
-#
+
+# Test tools: FirstSelectTool, ClipTool, SecondSelectTool, BufferTool, SpeciesSplit
+def main():
+    tool = FirstSelectTool()
+    tool.execute(tool.getParameterInfo(), None)
+
+if __name__ == '__main__':
+    main()
+
+print("Species Split Tool completed")
