@@ -1,26 +1,29 @@
 # NRS 528 Semester Final Project
 
-In this final assignment for this course, you should create a Python Toolbox that contains a minimum of three simple
-tools for undertaking geoprocessing and file management operations. These tools can be discrete or part of a larger
-workflow. However, the caveats are that you should create a "single file" toolbox (no includes, or external file
-tools) and you should aim to not exceed 2000 lines of code in its entirety (but if you do, no worries).
-You should document the toolbox using Github README.md and provide example data for running each of your tools.
+This is a toolbox that contains three main tools: Select and Describe, Split Species, and Create Shapefile. The first tool can use any shapefile the user would like to select a specific feature. The second tool uses a CSV file that includes different species and their coordinates. The last tool also uses the coordinates from the CSV file to generate shapefiles. All sample data are included. 
 
-### Grading and feedback will focus on:
-    1) Does the toolbox install, and the tools run successfully?
-    2) Cleanliness of code
-    3) Functionality and depth of processing operation
-    4) Appropriate use of documentation
-    5) Provide example data that allows me to test your tools.
+Select and Describe Tool
+The Select tool is used to select a specific feature in the input, such as selecting a town as the study area.
+In addition to Select, I also would like to obtain different elements of the data by using Describe.
+This returns different properties of the data, such as the data type, fields, indexes, etc.
+Here specifically, I would like to return the coordinate system.
+Steps:
+1. Set up input shapefile
+2. Input where clause expression if needed
+3. Output selected shapefile
+4. Describe input and output features and add description message
 
-### The criteria are:
-    1) Does the toolbox install and run? (25 points)
-    2) Cleanliness of code (25 points)
-    3) Functionality and depth of processing (25 points)
-    4) Appropriate use of documentation (15 points)
-    5) In addition, you must provide example data (10 points).
+Species Split Tool
+This tool takes a CSV input and splits the table based on the species and create new CSV files.
+Steps:
+1. Set up input folder where the CSV file is located
+2. Set up input CSV file
+3. Create temporary files folder and output folder
+4. Split CSV file
 
-The goal of this project is to create a toolbox that can perform analysis to identify suitable locations for a
-a wind farm. The main geoprocessing tools that will be used to create the toolbox are: Select, Clip, and Buffer.
-The main data used to test this toolbox are the Rhode Island Towns shapefile and the Rhode Island land cover types
-shapefile.
+Create Shapefile
+This tool creates shapefiles based on the species CSV files created by the Species Split Tool.
+Steps:
+1. Set up input file
+2. Generate shapefile using Make XY Event Layer
+
