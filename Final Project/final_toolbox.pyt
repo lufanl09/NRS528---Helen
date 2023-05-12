@@ -1,5 +1,7 @@
 ################
 # Final Toolbox
+# NRS 528
+# Helen Liu
 ################
 
 # Prompt:
@@ -24,10 +26,34 @@
     # In addition, you must provide example data (10 points).
 
 
-# The goal of this project is to find a suitable area to build a wind farm. The main geoprocessing tools that will be
-# used to create the toolbox are: Select, Clip, and Buffer.
+# This toolbox consists of 3 main tools: Select and Describe, Species Split, and Create Shapefile.
 
-# Preliminary step: please change the working directory on line 32 before running the code.
+# Select and Describe Tool
+# The Select tool is used to select a specific feature in the input, such as selecting a town as the study area.
+# In addition to Select, I also would like to obtain different elements of the data by using Describe.
+# This returns different properties of the data, such as the data type, fields, indexes, etc.
+# Here specifically, I would like to return the coordinate system.
+# Steps:
+# 1. Set up input shapefile
+# 2. Input where clause expression if needed
+# 3. Output selected shapefile
+# 4. Describe input and output features and add description message
+
+# Species Split Tool
+# This tool takes a CSV input and splits the table based on the species and create new CSV files.
+# Steps:
+# 1. Set up input folder where the CSV file is located
+# 2. Set up input CSV file
+# 3. Create temporary files folder and output folder
+# 4. Split CSV file
+
+# Create Shapefile
+# This tool creates shapefiles based on the species CSV files created by the Species Split Tool.
+# Steps:
+# 1. Set up input file
+# 2. Generate shapefile using Make XY Event Layer
+
+
 
 import arcpy
 import csv
@@ -42,15 +68,15 @@ class Toolbox(object):
         self.alias = ""
 
         # List of tool classes associated with this toolbox
-        self.tools = [FirstSelectTool, ClipTool, SecondSelectTool, BufferTool, SpeciesSplit]
+        self.tools = [SelectDescribeTool, SpeciesSplit, CreateShp]
 
 
-# The select tool is to select a town in Rhode Island as the main study area
-class FirstSelectTool(object):
+# Select and Describe Tool: select a feature in the data as the main study area and describe the data elements
+class SelectDescribeTool(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
-        self.label = "First Select Tool"
-        self.description = "Select a feature from an input feature class or layer."
+        self.label = "Select and Describe Tool"
+        self.description = "Select a feature from an input feature class or layer and describe feature elements."
         self.canRunInBackground = False
 
     def getParameterInfo(self):
@@ -62,7 +88,7 @@ class FirstSelectTool(object):
                                      parameterType="Required",  # Required|Optional|Derived
                                      direction="Input",  # Input|Output
                                      )
-        # in_feature.value = r"towns.shp"  # This is a default value that can be over-ridden in the toolbox
+        # in_feature.value = r"C:\NRS528\FinalProject\towns.shp"  # This is a default value that can be over-ridden in the toolbox
         params.append(in_feature)
 
         expression_input = arcpy.Parameter(name="where_clause",
@@ -80,7 +106,7 @@ class FirstSelectTool(object):
                                       parameterType="Required",
                                       direction="Output",
                                       )
-        out_feature.value = r"First_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
+        # out_feature.value = r"Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
         params.append(out_feature)
 
         return params
@@ -115,243 +141,19 @@ class FirstSelectTool(object):
 
         object_output = arcpy.Describe(out_feature)
 
+        # Describe the coordinate system of the input and output features
         arcpy.AddMessage("Input feature had a coordinate system of: " + object_input.SpatialReference.name)
         arcpy.AddMessage("Output feature had a coordinate system of: " + object_output.SpatialReference.name)
 
         return
 
 
-# The clip tool is to clip the RI land cover shapefile to the study area
-class ClipTool(object):
-    def __init__(self):
-        """Define the tool (tool name is the name of the class)."""
-        self.label = "Clip Tool"
-        self.description = "Extracts input features that overlay the clip features."
-        self.canRunInBackground = False
-
-    def getParameterInfo(self):
-        """Define parameter definitions"""
-        params = []
-        in_feature = arcpy.Parameter(name="input_feature",
-                                     displayName="Input Feature",
-                                     datatype="GPFeatureLayer",
-                                     parameterType="Required",  # Required|Optional|Derived
-                                     direction="Input",  # Input|Output
-                                     )
-        # in_feature.value = r"rilc11d.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(in_feature)
-
-        clip_feature = arcpy.Parameter(name="clip_feature",
-                                       displayName="Clip Feature",
-                                       datatype="GPFeatureLayer",
-                                       parameterType="Required",  # Required|Optional|Derived
-                                       direction="Input",  # Input|Output
-                                       )
-        clip_feature.value = r"First_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(clip_feature)
-
-        output_feature = arcpy.Parameter(name="output_feature",
-                                         displayName="Output Feature",
-                                         datatype="DEFeatureClass",
-                                         parameterType="Required",  # Required|Optional|Derived
-                                         direction="Output",  # Input|Output
-                                         )
-        output_feature.value = r"Clip_Output.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(output_feature)
-
-        return params
-
-    def isLicensed(self):
-        """Set whether tool is licensed to execute."""
-        return True
-
-    def updateParameters(self, parameters):
-        """Modify the values and properties of parameters before internal
-        validation is performed.  This method is called whenever a parameter
-        has been changed."""
-        return
-
-    def updateMessages(self, parameters):
-        """Modify the messages created by internal validation for each tool
-        parameter.  This method is called after internal validation."""
-        return
-
-    def execute(self, parameters, messages):
-        """The source code of the tool."""
-        in_feature = parameters[0].valueAsText
-        clip_feature = parameters[1].valueAsText
-        output_feature = parameters[2].valueAsText
-
-        arcpy.Clip_analysis(in_features=in_feature,
-                            clip_features=clip_feature,
-                            out_feature_class=output_feature,
-                            cluster_tolerance="")
-        return
-
-
-# The select tool is to select a land cover type to study
-class SecondSelectTool(object):
-    def __init__(self):
-        """Define the tool (tool name is the name of the class)."""
-        self.label = "Second Select Tool"
-        self.description = "Select a feature from an input feature class or layer."
-        self.canRunInBackground = False
-
-    def getParameterInfo(self):
-        """Define parameter definitions"""
-        params = []
-        in_feature = arcpy.Parameter(name="in_features",
-                                     displayName="Input Features",
-                                     datatype="GPFeatureLayer",
-                                     parameterType="Required", # Required|Optional|Derived
-                                     direction="Input", # Input|Output
-                                     )
-        # in_feature.value = r"rilc11d.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(in_feature)
-
-        expression_input = arcpy.Parameter(name="where_clause",
-                                           displayName="Expression",
-                                           datatype="GPSQLExpression",
-                                           parameterType="Optional",
-                                           direction="Input",
-                                           )
-        expression_input.parameterDependencies = [in_feature.name]
-        params.append(expression_input)
-
-        out_feature = arcpy.Parameter(name="out_feature_class",
-                                      displayName="Out Feature Class",
-                                      datatype="DEFeatureClass",
-                                      parameterType="Required",
-                                      direction="Output",
-                                      )
-        out_feature.value = r"Second_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(out_feature)
-
-        return params
-
-    def isLicensed(self):
-        """Set whether tool is licensed to execute."""
-        return True
-
-    def updateParameters(self, parameters):
-        """Modify the values and properties of parameters before internal
-        validation is performed.  This method is called whenever a parameter
-        has been changed."""
-        return
-
-    def updateMessages(self, parameters):
-        """Modify the messages created by internal validation for each tool
-        parameter.  This method is called after internal validation."""
-        return
-
-    def execute(self, parameters, messages):
-        """The source code of the tool."""
-        in_feature = parameters[0].valueAsText
-        expression_input = parameters[1].valueAsText
-        out_feature = parameters[2].valueAsText
-
-        object_input = arcpy.Describe(in_feature)
-
-        arcpy.Select_analysis(in_features=in_feature,
-                              out_feature_class=out_feature,
-                              where_clause=expression_input,
-                              )
-
-        object_output = arcpy.Describe(out_feature)
-
-        arcpy.AddMessage("Input feature had a coordinate system of: " + object_input.SpatialReference.name)
-        arcpy.AddMessage("Output feature had a coordinate system of: " + object_output.SpatialReference.name)
-
-        return
-
-
-# The buffer tool is to buffer around a certain type of land cover to find suitable land
-class BufferTool(object):
-    def __init__(self):
-        """Define the tool (tool name is the name of the class)."""
-        self.label = "Buffer Tool"
-        self.description = "Creates buffer polygons around input features to a specified distance."
-        self.canRunInBackground = False
-
-    def getParameterInfo(self):
-        """Define parameter definitions"""
-        params = []
-        input_feature = arcpy.Parameter(name="input_feature",
-                                        displayName="Input Feature",
-                                        datatype="GPFeatureLayer",
-                                        parameterType="Required",  # Required|Optional|Derived
-                                        direction="Input",  # Input|Output
-                                        )
-        input_feature.value = r"Second_Select_Output.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(input_feature)
-
-        buffer_distance = arcpy.Parameter(name="buffer_distance",
-                                          displayName="Buffer Distance",
-                                          datatype="GPLinearUnit",
-                                          parameterType="Required",  # Required|Optional|Derived
-                                          direction="Input",  # Input|Output
-                                          )
-        buffer_distance.parameterDependencies = [input_feature.name]  # This is a default value that can be over-ridden in the toolbox
-        buffer_distance.value = "1 kilometer"
-        params.append(buffer_distance)
-
-        output_feature = arcpy.Parameter(name="output_feature",
-                                         displayName="Output Feature",
-                                         datatype="DEFeatureClass",
-                                         parameterType="Required",  # Required|Optional|Derived
-                                         direction="Output",  # Input|Output
-                                         )
-        output_feature.value = r"Buffer_Output.shp"  # This is a default value that can be over-ridden in the toolbox
-        params.append(output_feature)
-
-        buffer_method = arcpy.Parameter(displayName="Method",
-                                        name="buffer_method",
-                                        datatype="GPString",
-                                        parameterType="Optional",  # Required|Optional|Derived
-                                        direction="Input"  # Input|Output
-                                        )
-        buffer_method.filter.type = "Value List"
-        buffer_method.filter.list = ["PLANAR", "GEODESIC"]
-        params.append(buffer_method)
-
-        return params
-
-    def isLicensed(self):
-        """Set whether tool is licensed to execute."""
-        return True
-
-    def updateParameters(self, parameters):
-        """Modify the values and properties of parameters before internal
-        validation is performed.  This method is called whenever a parameter
-        has been changed."""
-        return
-
-    def updateMessages(self, parameters):
-        """Modify the messages created by internal validation for each tool
-        parameter.  This method is called after internal validation."""
-        return
-
-    def execute(self, parameters, messages):
-        """The source code of the tool."""
-        input_feature = parameters[0].valueAsText
-        buffer_distance = parameters[1].valueAsText
-        output_feature = parameters[2].valueAsText
-        buffer_method = parameters[3].valueAsText
-
-        arcpy.Buffer_analysis(in_features=input_feature,
-                              out_feature_class=output_feature,
-                              buffer_distance_or_field=buffer_distance,
-                              method=buffer_method)
-        return
-
-
-
-# The buffer tool is to buffer around a certain type of land cover to find suitable land
+# Species Split Tool: split input CSV file based on species names
 class SpeciesSplit(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
-        self.label = "Buffer Tool"
-        self.description = "Creates buffer polygons around input features to a specified distance."
+        self.label = "Species Split"
+        self.description = "Splits CSV file based on different species."
         self.canRunInBackground = False
 
     def getParameterInfo(self):
@@ -363,6 +165,7 @@ class SpeciesSplit(object):
                                        parameterType="Required",  # Required|Optional|Derived
                                        direction="Input",  # Input|Output
                                        )
+        # input_folder.value = r"C:\NRS528\FinalProject"
         params.append(input_folder)
 
         input_file = arcpy.Parameter(name="input_file",
@@ -371,6 +174,7 @@ class SpeciesSplit(object):
                                      parameterType="Required",  # Required|Optional|Derived
                                      direction="Input",  # Input|Output
                                      )
+        # input_file.value = r"species.csv"
         params.append(input_file)
 
         return params
@@ -390,13 +194,13 @@ class SpeciesSplit(object):
         parameter.  This method is called after internal validation."""
         return
 
+    # Create new file paths and generate new csv files
     def execute(self, parameters, messages):
         """The source code of the tool."""
         input_directory = parameters[0].valueAsText
 
         keep_temp_files = True
 
-        # DO NOT DO ANYTHING TO THE BELOW
         if not os.path.exists(os.path.join(input_directory, "temporary_files")):
             os.mkdir(os.path.join(input_directory, "temporary_files"))
         if not os.path.exists(os.path.join(input_directory, "outputs")):
@@ -409,7 +213,7 @@ class SpeciesSplit(object):
             with open(os.path.join(input_directory, data_file)) as species_csv:
                 header_line = next(species_csv)
                 for row in csv.reader(species_csv):
-                    try: # Using try/except saves us if there is a line with no data in the file
+                    try:
                         if row[0] not in species_list:
                             species_list.append(row[0])
                     except:
@@ -437,13 +241,79 @@ class SpeciesSplit(object):
         return
 
 
-# Test tools: FirstSelectTool, ClipTool, SecondSelectTool, BufferTool, SpeciesSplit
-def main():
-    tool = FirstSelectTool()
-    tool.execute(tool.getParameterInfo(), None)
+# Create Shapefile Tool: create a shapefile based on input CSV file(s)
+class CreateShp(object):
+    def __init__(self):
+        """Define the tool (tool name is the name of the class)."""
+        self.label = "Create Shapefile"
+        self.description = "Create shapefile based on input CSV file(s)."
+        self.canRunInBackground = False
 
-if __name__ == '__main__':
-    main()
+    def getParameterInfo(self):
+        """Define parameter definitions"""
+        params = []
+        input_csv = arcpy.Parameter(name="input_csv",
+                                    displayName="Input CSV",
+                                    datatype="DETable",
+                                    parameterType="Required",  # Required|Optional|Derived
+                                    direction="Input",  # Input|Output
+                                    )
+        # input_csv.value = r"species.csv"
+        params.append(input_csv)
+
+        output_shp = arcpy.Parameter(name="output_shp",
+                                     displayName="Output Shapefile",
+                                     datatype="DEFeatureClass",
+                                     parameterType="Required",  # Required|Optional|Derived
+                                     direction="Output",  # Input|Output
+                                     )
+        params.append(output_shp)
+
+        return params
+
+    def isLicensed(self):
+        """Set whether tool is licensed to execute."""
+        return True
+
+    def updateParameters(self, parameters):
+        """Modify the values and properties of parameters before internal
+        validation is performed.  This method is called whenever a parameter
+        has been changed."""
+        return
+
+    def updateMessages(self, parameters):
+        """Modify the messages created by internal validation for each tool
+        parameter.  This method is called after internal validation."""
+        return
+
+    # Create shapefile based on coordinates in CSV file
+    def execute(self, parameters, messages):
+        """The source code of the tool."""
+        in_Table = parameters[0].valueAsText
+        x_coords = "Longitude"
+        y_coords = "Latitude"
+        z_coords = ""
+        out_Layer = parameters[0].name
+        saved_Layer = parameters[1].valueAsText
+
+        # Spatial reference for the coordinates
+        spRef = arcpy.SpatialReference(4326)  # 4326 == WGS 1984
+
+        # Using XY Event Layer to create a point feature layer based on XY coordinates
+        lyr = arcpy.MakeXYEventLayer_management(in_Table, x_coords, y_coords, out_Layer, spRef, z_coords)
+
+        arcpy.CopyFeatures_management(lyr, saved_Layer)
+
+        return
+
+
+# # Test tools: SelectDescribeTool, SpeciesSplit, CreateShp
+# def main():
+#     tool = SelectDescribeTool()
+#     tool.execute(tool.getParameterInfo(), None)
+#
+# if __name__ == '__main__':
+#     main()
 
 
 
